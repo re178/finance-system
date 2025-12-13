@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h2>FINANCIAL MANAGEMENT SYSTEM — ADMIN</h2>
+</header>
+
+<div class="container">
+  <h3>Central Control Panel</h3>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;">
+
+    <button onclick="go('dashboard.html')">📊 Main Dashboard</button>
+
+    <button onclick="go('income.html')">💰 Manage Income</button>
+
+    <button onclick="go('expense.html')">💸 Manage Expenses</button>
+
+    <button onclick="go('users.html')">👥 Users & Admin Panel</button>
+
+    <button onclick="go('reports.html')">📄 Reports</button>
+
+    <button onclick="go('pdf.html')">⬇ Download PDF</button>
+
+    <button class="danger" onclick="logout()">🚪 Logout</button>
+
+  </div>
+</div>
+
+<script>
+let user = JSON.parse(localStorage.getItem("user"));
+if (!user || user.role !== "admin") {
+  alert("Admins only");
+  window.location.href = "/login.html";
+}
+
+function go(page) {
+  window.location.href = "/" + page;
+}
+
+function logout() {
+  localStorage.removeItem("user");
+  window.location.href = "/login.html";
+}
+</script>
+
+</body>
+</html>
