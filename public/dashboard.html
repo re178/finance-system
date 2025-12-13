@@ -1,28 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>FINANCIAL DASHBOARD</h1>
 
-<div id="info"></div>
+<header>
+  <h1>FINANCIAL DASHBOARD</h1>
+</header>
 
-<button onclick="logout()">Logout</button>
+<div class="container">
+
+  <div id="info"></div>
+
+  <table border="1" width="100%">
+    <tr>
+      <th>Type</th>
+      <th>Amount</th>
+      <th>Category</th>
+      <th>Actions</th>
+    </tr>
+    <tbody id="list"></tbody>
+  </table>
+
+  <br>
+  <button onclick="logout()">Logout</button>
+
+</div>
 
 <script>
+// 🔐 AUTH CHECK
 let user = JSON.parse(localStorage.getItem("user"));
 if (!user) window.location.href = "/login.html";
 
+// 👤 USER INFO
 document.getElementById("info").innerHTML =
   `<h3>Welcome, ${user.username}</h3>
    <p>Role: ${user.role}</p>`;
 
+// 📥 LOAD TRANSACTIONS
+async function load() {
+  let res = await fetch("/transactions");
+  let data = await res.json();
+  let list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach(t => {
+    list.innerHTML += `
+      <tr>
+        <td>${t.type}</td>
+        <td>${t.amount}</td>
+        <td>${t.category}</td>
+        <td>
+          <button class="danger" onclick="del(${t.id})">Delete</button>
+        </td>
+      </tr>`;
+  });
+}
+
+// 🗑 DELETE TRANSACTION
+async function del(id) {
+  await fetch("/delete/" + id, { method: "DELETE" });
+  load();
+}
+
+// 🚪 LOGOUT
 function logout() {
   localStorage.removeItem("user");
   window.location.href = "/login.html";
 }
+
+// ▶ START
+load();
 </script>
 
 </body>
 </html>
+
+
