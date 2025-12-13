@@ -1,27 +1,30 @@
-app.use(express.static("public"));
 import express from "express";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
 import cors from "cors";
 import bodyParser from "body-parser";
 
-// Setup database
+// CREATE APP FIRST
+const app = express();
+
+// MIDDLEWARE
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.static("public"));
+
+// DATABASE SETUP
 const adapter = new JSONFile("db.json");
 const db = new Low(adapter, { users: [], transactions: [] });
 
-// Load DB
 await db.read();
 db.data ||= { users: [], transactions: [] };
 
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-
+// HOME
 app.get("/", (req, res) => {
   res.send("Finance System API is running...");
 });
 
-// Create transaction
+// ADD TRANSACTION
 app.post("/add-transaction", async (req, res) => {
   db.data.transactions.push({
     id: Date.now(),
@@ -35,15 +38,12 @@ app.post("/add-transaction", async (req, res) => {
   res.send({ message: "Transaction added" });
 });
 
-// Get all transactions
-app.get("/transactions", async (req, res) => {
+// GET TRANSACTIONS
+app.get("/transactions", (req, res) => {
   res.json(db.data.transactions);
 });
 
-app.listen(3000, () => {
-  console.log("Server running");
-});
-// Register user
+// REGISTER
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
 
@@ -61,8 +61,8 @@ app.post("/register", async (req, res) => {
   res.send({ message: "Account created successfully" });
 });
 
-// Login user
-app.post("/login", async (req, res) => {
+// LOGIN
+app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
   const user = db.data.users.find(
@@ -80,3 +80,9 @@ app.post("/login", async (req, res) => {
     }
   });
 });
+
+// START SERVER
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
+
