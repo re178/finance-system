@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h2>User Management (Admin)</h2>
+</header>
+
+<div class="container">
+  <table border="1" width="100%">
+    <tr>
+      <th>Username</th>
+      <th>Role</th>
+      <th>Action</th>
+    </tr>
+    <tbody id="users"></tbody>
+  </table>
+
+  <br>
+  <button onclick="back()">⬅ Back</button>
+</div>
+
+<script>
+// AUTH CHECK
+let user = JSON.parse(localStorage.getItem("user"));
+if (!user || user.role !== "admin") {
+  alert("Admins only");
+  window.location.href = "/login.html";
+}
+
+async function loadUsers() {
+  let res = await fetch("/users");
+  let data = await res.json();
+  let tbody = document.getElementById("users");
+  tbody.innerHTML = "";
+
+  data.forEach(u => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${u.username}</td>
+        <td>${u.role}</td>
+        <td>
+          ${u.role === "user" 
+            ? `<button onclick="makeAdmin(${u.id})">Make Admin</button>`
+            : "—"}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+async function makeAdmin(id) {
+  await fetch("/make-admin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id })
+  });
+  loadUsers();
+}
+
+function back() {
+  window.location.href = "/admin.html";
+}
+
+loadUsers();
+</script>
+
+</body>
+</html>
