@@ -1,3 +1,4 @@
+app.use(express.static("public"));
 import express from "express";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
