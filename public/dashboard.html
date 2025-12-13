@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+</head>
+<body>
+<h1>FINANCIAL DASHBOARD</h1>
+
+<div id="info"></div>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+let user = JSON.parse(localStorage.getItem("user"));
+if (!user) window.location.href = "/login.html";
+
+document.getElementById("info").innerHTML =
+  `<h3>Welcome, ${user.username}</h3>
+   <p>Role: ${user.role}</p>`;
+
+function logout() {
+  localStorage.removeItem("user");
+  window.location.href = "/login.html";
+}
+</script>
+
+</body>
+</html>
