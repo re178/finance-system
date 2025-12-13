@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login | Finance System</title>
+</head>
+<body>
+<h2>Login</h2>
+
+<form id="loginForm">
+  <input id="username" placeholder="Username" required><br>
+  <input id="password" type="password" placeholder="Password" required><br>
+  <button>Login</button>
+</form>
+
+<p id="msg"></p>
+
+<script>
+document.getElementById("loginForm").onsubmit = async (e) => {
+  e.preventDefault();
+
+  let res = await fetch("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: document.getElementById("username").value,
+      password: document.getElementById("password").value
+    })
+  });
+
+  let data = await res.json();
+
+  if (data.error) {
+    document.getElementById("msg").innerText = data.error;
+  } else {
+    localStorage.setItem("user", JSON.stringify(data.user));
+    window.location.href = "/dashboard.html";
+  }
+};
+</script>
+</body>
+</html>
