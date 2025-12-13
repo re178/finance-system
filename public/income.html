@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Income</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h2>Income Management</h2>
+</header>
+
+<div class="container">
+  <form id="incomeForm">
+    <input id="amount" type="number" placeholder="Amount" required>
+    <input id="category" placeholder="Category (Salary, Business)" required>
+    <button>Add Income</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Amount</th>
+        <th>Category</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="list"></tbody>
+  </table>
+</div>
+
+<script>
+async function load() {
+  const res = await fetch("/transactions");
+  const data = await res.json();
+  document.getElementById("list").innerHTML = data
+    .filter(t => t.type === "income")
+    .map(t => `
+      <tr>
+        <td>${t.amount}</td>
+        <td>${t.category}</td>
+        <td>
+          <button class="danger" onclick="del(${t.id})">Delete</button>
+        </td>
+      </tr>
+    `).join("");
+}
+
+document.getElementById("incomeForm").onsubmit = async e => {
+  e.preventDefault();
+  await fetch("/add-transaction", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      type: "income",
+      amount: amount.value,
+      category: category.value
+    })
+  });
+  load();
+};
+
+async function del(id) {
+  await fetch("/delete/" + id, { method: "DELETE" });
+  load();
+}
+
+load();
+</script>
+
+</body>
+</html>
