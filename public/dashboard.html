@@ -11,6 +11,7 @@
 </header>
 
 <div class="container">
+<div id="summary" style="margin-bottom:20px;"></div>
 
   <div id="info"></div>
 
@@ -63,6 +64,17 @@ async function load() {
 async function del(id) {
   await fetch("/delete/" + id, { method: "DELETE" });
   load();
+}
+async function loadSummary() {
+  const res = await fetch("/summary"); // call backend
+  const data = await res.json();
+
+  document.getElementById("summary").innerHTML = `
+    <h3>Financial Summary</h3>
+    <p>Total Income: $${data.income}</p>
+    <p>Total Expenses: $${data.expense}</p>
+    <p>Balance: $${data.balance}</p>
+  `;
 }
 
 // 🚪 LOGOUT
