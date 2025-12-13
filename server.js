@@ -86,6 +86,23 @@ app.delete("/delete/:id", async (req, res) => {
   await db.write();
   res.send({ message: "Deleted" });
 });
+// GET ALL USERS (ADMIN)
+app.get("/users", (req, res) => {
+  res.json(db.data.users);
+});
+
+// MAKE USER ADMIN
+app.post("/make-admin", async (req, res) => {
+  const { id } = req.body;
+  const user = db.data.users.find(u => u.id === id);
+
+  if (!user) return res.send({ error: "User not found" });
+
+  user.role = "admin";
+  await db.write();
+
+  res.send({ message: "User promoted to admin" });
+});
 
 // START SERVER
 app.listen(3000, () => {
