@@ -85,4 +85,10 @@ app.post("/login", (req, res) => {
 app.listen(3000, () => {
   console.log("Server running on port 3000");
 });
+app.delete("/delete/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  db.data.transactions = db.data.transactions.filter(t => t.id !== id);
+  await db.write();
+  res.send({ message: "Deleted" });
+});
 
