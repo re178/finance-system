@@ -80,6 +80,12 @@ app.post("/login", (req, res) => {
     }
   });
 });
+app.delete("/delete/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  db.data.transactions = db.data.transactions.filter(t => t.id !== id);
+  await db.write();
+  res.send({ message: "Deleted" });
+});
 
 // START SERVER
 app.listen(3000, () => {
