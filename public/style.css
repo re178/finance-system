@@ -1,11 +1,11 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f4f8fb;
   margin: 0;
+  background: #f4f8f7;
 }
 
 header {
-  background: #0a3d62; /* financial blue */
+  background: linear-gradient(90deg, #0a4d68, #088395);
   color: white;
   padding: 15px;
   text-align: center;
@@ -16,35 +16,25 @@ header {
 }
 
 button {
-  background: #1dd1a1; /* financial green */
+  padding: 12px;
   border: none;
-  padding: 8px 14px;
+  border-radius: 6px;
+  background: #088395;
   color: white;
+  font-size: 15px;
   cursor: pointer;
-  border-radius: 4px;
 }
 
-button.danger {
-  background: #ee5253;
+button:hover {
+  background: #0a4d68;
 }
 
-input, select {
-  padding: 6px;
+input {
+  padding: 10px;
   margin: 5px 0;
   width: 100%;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
-}
-
-th {
-  background: #dff9fb;
+.danger {
+  background: #c0392b;
 }
