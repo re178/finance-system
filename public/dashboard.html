@@ -64,7 +64,9 @@ async function load() {
 async function del(id) {
   await fetch("/delete/" + id, { method: "DELETE" });
   load();
+  loadSummary(); // <-- ADD THIS
 }
+
 async function loadSummary() {
   const res = await fetch("/summary"); // call backend
   const data = await res.json();
@@ -85,6 +87,8 @@ function logout() {
 
 // ▶ START
 load();
+loadSummary(); // <-- ADD THIS
+
 </script>
 
 </body>
