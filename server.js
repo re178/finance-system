@@ -103,6 +103,22 @@ app.post("/make-admin", async (req, res) => {
 
   res.send({ message: "User promoted to admin" });
 });
+// GET FINANCIAL SUMMARY
+app.get("/summary", (req, res) => {
+  const transactions = db.data.transactions;
+
+  const income = transactions
+    .filter(t => t.type === "income")
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  const expense = transactions
+    .filter(t => t.type === "expense")
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  const balance = income - expense;
+
+  res.json({ income, expense, balance });
+});
 
 // START SERVER
 app.listen(3000, () => {
