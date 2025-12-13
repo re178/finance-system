@@ -1,6 +1,5 @@
 import express from "express";
-import { Low } from "lowdb";
-import { JSONFile } from "lowdb/node";
+import mongoose from "mongoose";
 import cors from "cors";
 import bodyParser from "body-parser";
 
@@ -12,12 +11,36 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public"));
 
-// DATABASE SETUP
-const adapter = new JSONFile("db.json");
-const db = new Low(adapter, { users: [], transactions: [] });
+// ---------------- CONNECT TO MONGODB ----------------
+mongoose.connect(
+  "mongodb+srv://esilesirayland_db_user:0hqcmtiyshtsWEB9@finance-system.6pracku.mongodb.net/financeSystem?retryWrites=true&w=majority",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+)
+.then(() => console.log("MongoDB connected"))
+.catch(err => console.log("MongoDB connection error:", err));
 
-await db.read();
-db.data ||= { users: [], transactions: [] };
+// ---------------- SCHEMAS ----------------
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  role: String
+});
+
+const transactionSchema = new mongoose.Schema({
+  type: String,
+  amount: Number,
+  category: String,
+  date: { type: Date, default: Date.now }
+});
+
+// ---------------- MODELS ----------------
+const User = mongoose.model("User", userSchema);
+const Transaction = mongoose.model("Transaction", transactionSchema);
+
+// ---------------- ROUTES ----------------
 
 // HOME
 app.get("/", (req, res) => {
@@ -26,86 +49,68 @@ app.get("/", (req, res) => {
 
 // ADD TRANSACTION
 app.post("/add-transaction", async (req, res) => {
-  db.data.transactions.push({
-    id: Date.now(),
+  await Transaction.create({
     type: req.body.type,
     amount: req.body.amount,
-    category: req.body.category,
-    date: new Date()
+    category: req.body.category
   });
-
-  await db.write();
   res.send({ message: "Transaction added" });
 });
 
 // GET TRANSACTIONS
-app.get("/transactions", (req, res) => {
-  res.json(db.data.transactions);
+app.get("/transactions", async (req, res) => {
+  const transactions = await Transaction.find();
+  res.json(transactions);
 });
 
 // REGISTER
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
-
-  const exists = db.data.users.find(u => u.username === username);
+  const exists = await User.findOne({ username });
   if (exists) return res.send({ error: "Username already exists" });
 
-  db.data.users.push({
-    id: Date.now(),
-    username,
-    password,
-    role: "user"
-  });
-
-  await db.write();
+  await User.create({ username, password, role: "user" });
   res.send({ message: "Account created successfully" });
 });
 
 // LOGIN
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-
-  const user = db.data.users.find(
-    u => u.username === username && u.password === password
-  );
-
+  const user = await User.findOne({ username, password });
   if (!user) return res.send({ error: "Invalid login" });
 
   res.send({
     message: "Login successful",
-    user: {
-      id: user.id,
-      username: user.username,
-      role: user.role
-    }
+    user: { id: user._id, username: user.username, role: user.role }
   });
 });
+
+// DELETE TRANSACTION
 app.delete("/delete/:id", async (req, res) => {
-  const id = Number(req.params.id);
-  db.data.transactions = db.data.transactions.filter(t => t.id !== id);
-  await db.write();
+  await Transaction.deleteOne({ _id: req.params.id });
   res.send({ message: "Deleted" });
 });
+
 // GET ALL USERS (ADMIN)
-app.get("/users", (req, res) => {
-  res.json(db.data.users);
+app.get("/users", async (req, res) => {
+  const users = await User.find();
+  res.json(users);
 });
 
 // MAKE USER ADMIN
 app.post("/make-admin", async (req, res) => {
   const { id } = req.body;
-  const user = db.data.users.find(u => u.id === id);
-
+  const user = await User.findById(id);
   if (!user) return res.send({ error: "User not found" });
 
   user.role = "admin";
-  await db.write();
-
+  await user.save();
   res.send({ message: "User promoted to admin" });
 });
+
 // GET FINANCIAL SUMMARY
-app.get("/summary", (req, res) => {
-  const transactions = db.data.transactions;
+app.get("/summary", async (req, res) => {
+  const transactions = await Transaction.find();
 
   const income = transactions
     .filter(t => t.type === "income")
@@ -116,18 +121,11 @@ app.get("/summary", (req, res) => {
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
   const balance = income - expense;
-
   res.json({ income, expense, balance });
 });
 
-// START SERVER
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+// ---------------- START SERVER ----------------
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-app.delete("/delete/:id", async (req, res) => {
-  const id = Number(req.params.id);
-  db.data.transactions = db.data.transactions.filter(t => t.id !== id);
-  await db.write();
-  res.send({ message: "Deleted" });
-});
-
