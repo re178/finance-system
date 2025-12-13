@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sign Up | Finance System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Create Account</h2>
+
+<form id="signupForm">
+  <input id="username" placeholder="Username" required><br>
+  <input id="password" type="password" placeholder="Password" required><br>
+  <button type="submit">Sign Up</button>
+</form>
+
+<p id="msg"></p>
+
+<script>
+document.getElementById("signupForm").onsubmit = async (e) => {
+  e.preventDefault();
+
+  let res = await fetch("/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: document.getElementById("username").value,
+      password: document.getElementById("password").value
+    })
+  });
+
+  let data = await res.json();
+
+  if (data.error) {
+    document.getElementById("msg").innerText = data.error;
+  } else {
+    alert("Account created successfully! You can now login.");
+    window.location.href = "/login.html";
+  }
+};
+</script>
+
+<p>Already have an account? <a href="/login.html">Login here</a></p>
+
+</body>
+</html>
