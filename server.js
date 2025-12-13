@@ -42,3 +42,40 @@ app.get("/transactions", async (req, res) => {
 app.listen(3000, () => {
   console.log("Server running");
 });
+// Register user
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+
+  const exists = db.data.users.find(u => u.username === username);
+  if (exists) return res.send({ error: "Username already exists" });
+
+  db.data.users.push({
+    id: Date.now(),
+    username,
+    password,
+    role: "user"
+  });
+
+  await db.write();
+  res.send({ message: "Account created successfully" });
+});
+
+// Login user
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  const user = db.data.users.find(
+    u => u.username === username && u.password === password
+  );
+
+  if (!user) return res.send({ error: "Invalid login" });
+
+  res.send({
+    message: "Login successful",
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role
+    }
+  });
+});
